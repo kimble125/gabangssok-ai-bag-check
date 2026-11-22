@@ -1,7 +1,7 @@
 # 제출 점검표
 
 > 2026-11-20 16시 기준. 체크는 "파일에 들어 있음"이고, 사람이 눈으로 읽고 확인한 것은 따로 적는다.
-> 낼 것: 기획안 `plan/gabangssok_plan.pdf` + 주소 하나 https://kimble125.github.io/chaenggyeojwo-ai-bag-check/ (2026-11-20 15:56에 켬)
+> 낼 것: 기획안 `plan/gabangssok_plan.pdf` + 주소 하나 https://kimble125.github.io/gabangssok-ai-bag-check/ (2026-11-20 15:56에 켬)
 
 ## 기획안 (A4 2쪽 이내, PDF로 냄)
 - [x] 참가 정보: 팀명 잘챙겨조(호연 확인, 11-20), 구성원

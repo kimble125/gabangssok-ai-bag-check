@@ -49,7 +49,7 @@ function josa(word, withFinal, noFinal) {
       const notes = [];
       if (m.condition) notes.push(`조건: ${m.condition}`);
       if (m.not_accepted?.length) notes.push(`${m.not_accepted.join(", ")}${josa(m.not_accepted[m.not_accepted.length - 1], "은", "는")} 안 돼요`);
-      if (it.guardian) notes.push("필요한 아이만 · 보호자가 정해요(아이 미션에는 안 나와요)");
+      if (it.guardian) notes.push("필요한 아이만 · 보호자가 정해요(우리 미션에는 안 나와요)");
       else if (m.conditional === "rain") notes.push(it.optional ? "비 올 때만(지금은 비 소식 없음)" : "비 소식이 있어 챙겨요");
       else if (m.optional_by_notice) notes.push("통신문에 '선택'이라고 적혀 있어요");
       if (m.kind === "wear") notes.push("입고 가는 것");
@@ -76,7 +76,7 @@ function josa(word, withFinal, noFinal) {
         <button data-acc="${esc(r.name)}" aria-label="${esc(r.name)} 넣기">＋</button><button data-dec="${esc(r.name)}" aria-label="${esc(r.name)} 빼기">✕</button></span>`).join("")}</div>
       ${p.guardian_recs.length ? `<p class="hint"><b>보호자가 정해요:</b> ${p.guardian_recs.map((r) => `${esc(r.emoji)} ${esc(r.name)} <button class="ghost small" data-acc="${esc(r.name)}">넣기</button>`).join(" ")}<br>약은 넣어도 아이 화면에는 나오지 않아요.</p>` : ""}</div>` : "";
     const stickerRow = MODE.stickers.map((x) => `<button data-stk="${esc(x)}" aria-label="칭찬 스티커 ${esc(x)}">${esc(x)}</button>`).join("");
-    const result = v.kind !== "deadline" && v.items.length ? `<div class="card plus"><strong>아이 미션</strong>
+    const result = v.kind !== "deadline" && v.items.length ? `<div class="card plus"><strong>우리 미션</strong>
       <p class="sum">준비물 ${s.counted}${s.skipped?.length ? ` (이번엔 뺀 것 ${s.skipped.length})` : ""} · 넣음 ${s.packed} · 아직 ${s.left.length}${s.left.length ? ` (${s.left.map(esc).join(", ")})` : ""}${s.optional ? ` · 추천 ${s.optional} 중 ${s.optional_packed}` : ""}${s.open_alerts.length ? ` · 빼야 할 것 ${s.open_alerts.map(esc).join(", ")}` : ""}</p>
       <div class="stk-row">${stickerRow}</div>
       <div class="chip-add"><input id="stkMsg" maxlength="40" placeholder="한마디(안 써도 돼요). 예: 스스로 챙겨서 멋져"></div>

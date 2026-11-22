@@ -82,7 +82,8 @@
   </div>
   <nav>
     <a class="pill" href="../index.html">한눈에 보기</a>
-    <a class="pill" href="https://github.com/kimble125/chaenggyeojwo-ai-bag-check/tree/hoyeon" target="_blank" rel="noopener">코드(GitHub)</a>
+    <a class="pill" href="https://github.com/kimble125/gabangssok-ai-bag-check/tree/hoyeon" target="_blank" rel="noopener">코드(GitHub)</a>
+    <a class="pill" href="https://github.com/kimble125/gabangssok-ai-bag-check/blob/main/docs/real-day-guide.md" target="_blank" rel="noopener">실제판 하루 따라 하기</a>
     <button class="pill" id="reset">↺ 처음으로</button>
   </nav>
 </header>
@@ -91,7 +92,7 @@
 <div class="tabs" role="tablist">
   <button data-pane="guide" class="on">① 둘러보기</button>
   <button data-pane="parent">엄마 화면</button>
-  <button data-pane="kid">아이 화면</button>
+  <button data-pane="kid">우리 미션</button>
 </div>
 
 <main>
@@ -106,8 +107,8 @@
       <div class="frame"><iframe id="f-parent" name="parent" title="엄마 화면"></iframe></div>
     </div>
     <div class="phone" data-who="kid">
-      <div class="label">아이 화면 <span>스스로 챙기기 미션</span></div>
-      <div class="frame"><iframe id="f-kid" name="kid" title="아이 화면"></iframe></div>
+      <div class="label">우리 미션 <span>쏙이랑 같이 가방 챙기기</span></div>
+      <div class="frame"><iframe id="f-kid" name="kid" title="쏙이와 함께하는 우리 미션"></iframe></div>
     </div>
   </section>
 </main>
@@ -136,13 +137,13 @@ const STEPS = [
   { who: "엄마", title: "숨은 조건과 금지를 찾아요",
     text: "일정을 열면 <b>가져오지 않는 것</b>이 통신문 문장과 함께 나와요. <b>추천 준비물</b>은 통신문에 적힌 것과 섞지 않고 근거를 붙여 따로 보여 줘요.",
     go: () => inParent((w) => w.openSheet(eventId)) },
-  { who: "아이", title: "아이가 스스로 챙겨요",
+  { who: "아이", title: "쏙이랑 같이 챙겨 볼까?",
     text: "<b>이것도 챙길까?</b>에서 추천을 고르고, <b>유리병이 있음</b> 예시 사진을 눌러 보세요. 가져가면 안 되는 것을 알려 주고, 안 보인 것만 하나씩 확인해요.",
     go: () => openKid(`kid.html?e=${eventId}`) },
   { who: "엄마", title: "엄마는 보고 칭찬해요",
     text: "아이가 <b>엄마에게 보여 주기</b>를 누르면 결과가 남아요. 일정에서 <b>칭찬 스티커</b>를 붙이면 아이의 스티커판(⭐)에 쌓여요. <b>📅 내 캘린더에 넣기</b>로 구글 캘린더 링크나 캘린더 파일도 만들 수 있어요.",
     go: () => inParent((w) => w.openSheet(eventId).then(() => setTimeout(() => w.document.querySelector("#sheet [data-stk]")?.scrollIntoView({ block: "center" }), 300))) },
-  { who: "아이", title: "집에 와서 다시 확인해요",
+  { who: "아이", title: "우리 물건, 집에 잘 돌아왔을까?",
     text: "다녀온 뒤에는 가져간 것 가운데 <b>다시 가져와야 하는 것</b>만 물어봐요. 도시락 속 음식이나 물티슈처럼 쓰고 없어지는 것은 빼요.",
     go: () => openKid(`kid.html?e=${eventId}&mode=home`) },
 ];
@@ -166,7 +167,7 @@ window.chaengLink = (href) => {
 };
 
 function renderSteps() {
-  $("#steps").innerHTML = STEPS.map((s, i) => `<div class="step" data-i="${i}"><h3><i>${i + 1}</i>${s.title}<span class="who ${s.who === "아이" ? "kid" : ""}">${s.who} 화면</span></h3><p>${s.text}</p><button data-go="${i}">${s.who} 화면에서 보기 ›</button></div>`).join("");
+  $("#steps").innerHTML = STEPS.map((s, i) => `<div class="step" data-i="${i}"><h3><i>${i + 1}</i>${s.title}<span class="who ${s.who === "아이" ? "kid" : ""}">${s.who === "아이" ? "우리 미션" : "엄마 화면"}</span></h3><p>${s.text}</p><button data-go="${i}">${s.who === "아이" ? "우리 미션 열기" : "엄마 화면에서 보기"} ›</button></div>`).join("");
   $$("#steps [data-go]").forEach((b) => b.addEventListener("click", () => {
     const i = +b.dataset.go;
     $$(".step").forEach((el) => el.classList.toggle("on", +el.dataset.i === i));
