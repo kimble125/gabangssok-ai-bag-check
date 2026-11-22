@@ -65,7 +65,7 @@ ROWS = [
     ("5. AI 활용 계획", [
         ("img", "flow.png", 152, "동작 구조도: AI 모델이 하는 일과 규칙 코드가 하는 일"),
         ("b", "**Claude API(AI 모델)**: 통신문(글·사진) 읽기, 펼친 준비물 사진에서 보이는 것 찾기"),
-        ("b", "**규칙 코드**: 금지·조건·\"등\" 찾기, 추천, 세기, \"다 챙겼지\" 판정 → 자동 시험 55개. 통신문의 그 줄을 근거로 같이 보여 줌. 실제 통신문 23건의 문장으로 재 보니 \"등\" 11건 중 11건, 금지 물건 43개 중 35개를 찾음(놓친 표현과 못 읽는 글 형식은 PoC 페이지에 공개)"),
+        ("b", "**규칙 코드**: 금지·조건·\"등\" 찾기, 추천, 세기, \"다 챙겼지\" 판정 → 자동 시험 62개. 통신문의 그 줄을 근거로 같이 보여 줌. 실제 통신문 23건의 문장으로 재 보니 \"등\" 11건 중 11건, 금지 물건 43개 중 35개 → 놓친 표현을 고친 뒤 43개(같은 23건으로 다시 잰 값. 못 읽는 글 형식은 PoC 페이지에 공개)"),
         ("b", "**MCP · Open-Meteo**: 캘린더와 가방쏙 규칙을 MCP 도구로 엶. Claude 앱에 연결해 '뭘 챙겨야 해?'에 규칙 코드의 값으로 답하는 것을 확인 · 날씨와 미세먼지 예보"),
         ("b", "**이렇게 나눈 이유**: 사진을 보는 모델은 틀릴 수 있음(GPT-4V 정답률: 원본 79.6% → 손본 이미지 38.4%)⁴ → 세기와 판정은 규칙이 맡고, 사진에서는 보이는지만 물음. **안 보인 것은 아이가 직접 확인**"),
         ("b", "**아이를 지키는 것**: 아이는 AI와 직접 대화하지 않음. 약은 보호자 화면에만 나옴. 사진은 저장하지 않고 위치도 쓰지 않음"),
@@ -299,17 +299,21 @@ def build_html(path):
     page = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><title>{TITLE} · 잘챙겨조</title>
 <style>
+  /* PDF에서 글을 뽑을 수 있게 TrueType 글꼴(나눔고딕, OFL)을 함께 둔다. Apple SD Gothic Neo는 인쇄 때 Type3로 들어가 띄어쓰기가 깨졌다. */
+  @font-face {{ font-family: "GSNanum"; src: url("fonts/NanumGothic-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }}
+  @font-face {{ font-family: "GSNanum"; src: url("fonts/NanumGothic-Bold.ttf") format("truetype"); font-weight: 600 700; font-display: block; }}
   @page {{ size: A4; margin: 11mm 14mm; }}
   * {{ box-sizing: border-box; }}
-  body {{ margin: 0; font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; font-size: 11.4pt; line-height: 1.5; color: #16182a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  body {{ margin: 0; font-family: "GSNanum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-size: 11.4pt; line-height: 1.42; color: #16182a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
   header {{ display: flex; align-items: center; gap: 3mm; margin-bottom: 1.6mm; position: relative; padding-top: 1mm; }}
   header img {{ height: 12mm; }}
   header h1 {{ margin: 0; font-size: 20pt; color: #6a48f0; white-space: nowrap; }}
   header .tag {{ font-size: 10.5pt; font-weight: 600; white-space: nowrap; padding-top: 3mm; }}
   header .meta {{ position: absolute; right: 0; top: 0; font-size: 8.5pt; color: #62616d; white-space: nowrap; }}
   table {{ width: 100%; border-collapse: collapse; }}
-  th, td {{ border: 0.25mm solid #b9b6c6; padding: 2mm 2.4mm; vertical-align: top; text-align: left; }}
-  th {{ width: 24mm; background: #efeaff; font-weight: 700; font-size: 10.6pt; word-break: keep-all; }}
+  th, td {{ border: 0.25mm solid #b9b6c6; padding: 1.6mm 2.2mm; vertical-align: top; text-align: left; }}
+  th {{ width: 26mm; background: #efeaff; font-weight: 700; font-size: 10.6pt; word-break: keep-all; }}
+  td {{ word-break: keep-all; overflow-wrap: anywhere; }}
   td b {{ color: #1d1640; }}
   p {{ margin: 0; }}
   p.h {{ font-weight: 700; color: #6a48f0; margin-top: 1.4mm; }}

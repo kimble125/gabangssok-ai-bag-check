@@ -29,7 +29,7 @@
 
 ```bash
 cd poc/donghyun
-python3 -m unittest discover -s tests -v      # 시험 55개(모델·네트워크 없음)
+python3 -m unittest discover -s tests -v      # 시험 62개(모델·네트워크 없음)
 python3 demo_server.py                        # http://127.0.0.1:6111 (파이썬 3.10 이상, 설치 없음)
 ```
 

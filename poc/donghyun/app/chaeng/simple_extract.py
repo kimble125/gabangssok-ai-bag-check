@@ -46,10 +46,26 @@ def sample(key: str = "a", today: Date | None = None) -> dict:
 _ITEM_HEAD = re.compile(r"^[\s\d.※\-•·*◦■□▶○]*(?:(?:학생|개인|학습|복장\s*및)\s*)*(?:준비물|챙길\s?것|지참물)\s*[:：]?\s*")
 
 
+_BAN_PAREN = re.compile(r"\s*[(（][^()（）]*(?:불가|금지|안\s?됨|안\s?됩니다|않음|않습니다|하지\s?않|[X✕×])[^()（）]*[)）]\s*$")
+
+
+def cut_note(body: str) -> str:
+    """준비물 줄 안에서 괄호 밖의 ※나 ' * ' 뒤는 안내문이다. "간편 복장 등 ※실내 수영장에서 …" → "간편 복장 등" """
+    depth = 0
+    for i, ch in enumerate(body):
+        if ch in "(（":
+            depth += 1
+        elif ch in ")）":
+            depth = max(0, depth - 1)
+        elif depth == 0 and (ch == "※" or (ch == "*" and i > 0 and body[i - 1] == " ")):
+            return body[:i]
+    return body
+
+
 def split_items(chunk: str) -> list[str]:
-    """쉼표로 나누되 괄호 안의 쉼표는 건드리지 않는다. 끝의 '등'은 뗀다."""
+    """쉼표로 나누되 괄호 안의 쉼표는 건드리지 않는다. 끝의 '등'과 금지 괄호는 뗀다."""
     out, buf, depth = [], "", 0
-    for ch in chunk:
+    for ch in cut_note(chunk):
         if ch in "(（":
             depth += 1
         elif ch in ")）":
@@ -62,7 +78,9 @@ def split_items(chunk: str) -> list[str]:
     out.append(buf)
     items = []
     for x in out:
-        x = re.sub(r"\s+등\s*[.]?\s*$", "", x.strip()).strip(" .")
+        x = _BAN_PAREN.sub("", x.strip())             # "비닐 봉투 (장난감 등 불가)" → "비닐 봉투" (금지는 guard가 통신문 글에서 따로 읽음)
+        x = re.sub(r"\s+등\s*[.]?\s*$", "", x).strip(" .")
+        x = re.sub(r"만\s*준비$", "", x).strip()       # "음료수와 물만 준비" → "음료수와 물"
         x = re.sub(r"\s*착용$", "", x)                 # "운동화 착용" → "운동화"
         if x and x != "등":
             items.append(x)
@@ -110,7 +128,7 @@ def extract(text: str, title: str | None = None, posted: str | None = None, toda
                     start = f"{int(t.group(1)):02d}:{int(t.group(2) or 0):02d}"
         if re.match(r"^[\d.\s]*장소", l):
             loc = re.split(r"[:：]", l, maxsplit=1)[-1].strip()
-        if re.search(r"유의|주의|※|비가 오면", l) and not re.match(r"^[\d.\s]*(준비물|선택)", l) and len(notes) < 3:
+        if re.search(r"유의|주의|※|비가 오면", l) and not re.match(r"^[\d.\s]*(준비물|선택)", l) and not _ITEM_HEAD.match(l) and len(notes) < 3:
             notes.append(re.sub(r"^[\d.\s]*", "", l))
     if not when:
         if any("내일" in l for l in lines[:3]):

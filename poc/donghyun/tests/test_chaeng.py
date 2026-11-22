@@ -567,5 +567,57 @@ class DemoDispatchTest(unittest.TestCase):
         self.assertEqual([e["title"] for e in self.call("GET", "/api/events")[1]], seeded)
 
 
+class RealNoticeSentenceTest(unittest.TestCase):
+    """실제 초등학교 통신문 문장(scenarios.json sources에서 그대로 옮김)으로 2026-11-22 실측에서 놓친 것을 다시 본다."""
+
+    def forb(self, text):
+        return [f["name"] for f in guard.find_forbidden(text)]
+
+    def items(self, text):
+        return simple_extract.extract("안내\n" + text)["events"][0]["items"]
+
+    def test_valuables_not_brought_to_school(self):      # 9 안양 민백초
+        t = "◦ 수영 실기교육 하는 날에는 분실 등의 문제로 휴대전화, 귀걸이, 목걸이, 시계, 용돈 등의 귀중품을 가지고 등교하지 않도록 합니다."
+        names = self.forb(t)
+        for n in ("휴대전화", "귀걸이", "목걸이", "시계", "용돈"):
+            self.assertIn(n, names)
+        self.assertNotIn("분실", " ".join(names))
+
+    def test_not_worn(self):                               # 12 고양 신능초
+        t = "◦ 개인 귀중품은 수영장으로 가져오지 않도록 하며 개인 물건을 잘 관리합니다. 특히 시계, 귀걸이, 목걸이는 착용하지 않습니다."
+        self.assertEqual(self.forb(t), ["개인 귀중품", "시계", "귀걸이", "목걸이"])
+
+    def test_wash_note_and_advice_are_not_forbidden(self):  # 18 청주 내수초, 2 김포 통진초
+        self.assertEqual(self.forb("양말, 속옷(여벌, 세탁 불가), 개인용 물병 또는 텀블러"), [])
+        t = "5. 준비물 : 간편한 복장, 운동화, 음료수와 물만 준비 (※ 이동차량 내 취식 자제/ 체험시설 내 외부 음식 반입 불가)"
+        self.assertEqual(self.forb(t), ["외부 음식"])
+
+    def test_ban_paren_leaves_item_name(self):             # 1 성남 금빛초
+        t = "3. 준비물: 개인 도시락, 간식, 물, 음료수, 멀미약, 비닐 봉투 (장난감 등 불가)"
+        items = self.items(t)
+        self.assertEqual(items[-1], "비닐 봉투")
+        self.assertIn("장난감", self.forb(t))
+        self.assertIn("장난감", [f["name"] for f in guard.analyze(t, items)["forbidden"]])
+
+    def test_note_after_mark_is_cut(self):                 # 11 부천 원종초, 13 대전오류초, 12 고양 신능초
+        self.assertEqual(self.items("2. 학생 준비물: 수영복(실내용 권장), 수영모자, 수경, 수영복 담을 가방, 수건 등 (구명조끼는 준비하지 않음)")[-1], "수건")
+        t = "5. 준비물: 실내 수영복, 수영모, 수경, 수건, 수영가방, 비닐봉지(지퍼백), 간편 복장 등 ※실내 수영장에서 입는 실내 수영복으로 준비 (반팔, 반바지 착용 안 됨)"
+        self.assertEqual(self.items(t)[-2:], ["비닐봉지(지퍼백)", "간편 복장"])
+        self.assertEqual(self.forb(t), ["반팔", "반바지"])
+        t = "4. 학생 준비물 수영복, 수영모자, 물안경, 수영가방, 수건, 여분 봉지, 샤워 도구(선택) 등 * 모든 물건에 자기 이름 쓰기"
+        self.assertEqual(self.items(t)[-1], "샤워 도구(선택)")
+
+    def test_condition_paren_stays(self):                  # 조건 괄호는 이름에 남아 annotate가 읽는다
+        items = self.items(NOTICE_A.split("\n")[3])
+        self.assertIn("마실 물(플라스틱 물통)", items)
+        self.assertIn("개인 약품(멀미약 등 필요한 학생)", items)
+        self.assertEqual(guard.annotate("마실 물(플라스틱 물통)")["condition"], "플라스틱 물통")
+        self.assertEqual(guard.annotate("개인 약품(멀미약 등 필요한 학생)")["conditional"], "needed")
+
+    def test_grade_lists_are_left_alone(self):             # 21 과천초: 머리말 없는 학년별 목록은 아직 읽지 않는다(지어내지 않음)
+        t = "(가정에서 직접 구매가 필요한 개인 학습준비물) 1학년: 풀, 가위, 색연필, 사인펜, 필기도구(연필, 지우개), 네임펜"
+        self.assertEqual(self.items(t), [])
+
+
 if __name__ == "__main__":
     unittest.main()

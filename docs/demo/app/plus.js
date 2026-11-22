@@ -142,11 +142,29 @@ function josa(word, withFinal, noFinal) {
       always: $("#pfAlways").value.split(",").map((x) => x.trim()).filter(Boolean) } }).catch(() => toast("아이 정보를 저장하지 못했어요")));
   }
 
+  /* ---------- 예시 판: 실제 통신문 문장으로 해 보기 ----------
+     scenarios.json sources 에서 그대로 옮긴 인용(제목·문장·주소). 인용의 " / " 는 줄바꿈으로 넣는다. */
+  const REAL_NOTICES = [{"label": "금빛초 체험", "school": "성남 금빛초", "title": "2026 5학년 현장체험학습 참가 희망 조사(한국잡월드 숙련기술체험관)", "quote": "3. 준비물: 개인 도시락, 간식, 물, 음료수, 멀미약, 비닐 봉투 (장난감 등 불가)", "url": "https://www.goesn.kr/geumbit-e/na/ntt/selectNttInfo.do?mi=11070&nttSn=1926110"}, {"label": "민백초 수영", "school": "안양 민백초", "title": "2026 초등생존수영 실기교육 실시 안내 및 학생 안전생활 수칙(3,4학년)", "quote": "5. 학생 준비물 : 수영복, 수영모자, 수영가방, 수건, 여분의 비닐 봉지, 등 (※ 입장제한: 래쉬가드, 아쿠아슈즈, 남성용 트렁크, 일반 티셔츠, , 스킨스쿠버 슈트, 수경 ) / ◦ 수영 실기교육 하는 날에는 분실 등의 문제로 휴대전화, 귀걸이, 목걸이, 시계, 용돈 등의 귀중품을 가지고 등교하지 않도록 합니다.", "url": "https://www.goeay.kr/minbaeg-e/na/ntt/selectNttInfo.do?bbsId=699&mi=2430&nttSn=1310717"}, {"label": "신능초 수영", "school": "고양 신능초", "title": "2025 초등생존수영 실기교육 실시 및 학부모자원봉사자 지원 안내", "quote": "4. 학생 준비물 수영복, 수영모자, 물안경, 수영가방, 수건, 여분 봉지, 샤워 도구(선택) 등 * 모든 물건에 자기 이름 쓰기 / ◦ 개인 귀중품은 수영장으로 가져오지 않도록 하며 개인 물건을 잘 관리합니다. 특히 시계, 귀걸이, 목걸이는 착용하지 않습니다.", "url": "https://www.goegy.kr/shinneung-e/na/ntt/selectNttInfo.do?bbsId=854&mi=2452&nttSn=1145358"}];
+  function mountRealNotices() {
+    $("#extractBtn").insertAdjacentHTML("beforebegin", `<div class="realrow" id="realRow">
+      <span class="lbl">실제 통신문 문장으로 해 보기</span>
+      <div class="realbtns">${REAL_NOTICES.map((r, i) => `<button class="ghost small" data-real="${i}">${esc(r.label)}</button>`).join("")}</div>
+      <p class="hint">실제 초등학교 통신문의 준비물 주변 문장이에요(출처: ${REAL_NOTICES.map((r) => `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.school)}</a>`).join(", ")}). 날짜가 없어서 내일 일정으로 넣어요.</p></div>`);
+    $$("#realRow [data-real]").forEach((b) => b.addEventListener("click", () => {
+      const r = REAL_NOTICES[+b.dataset.real];
+      $(".tab[data-src='text']")?.click();
+      $("#textIn").value = r.title + "\n" + r.quote.replace(/ \/ /g, "\n");
+      $("#textIn").focus();
+      toast(`${r.school} 통신문 문장을 넣었어요. '일정·준비물 뽑기'를 눌러 보세요`);
+    }));
+  }
+
   /* ---------- 통신문 탭: 고지 + 알림장 없는 평소 일정 ---------- */
   async function mountAdd() {
     $("#extractStatus").insertAdjacentHTML("afterend", `<p class="hint">${MODE.demo
       ? "예시 모드예요. AI를 부르지 않고 규칙으로 읽어요. 링크·사진은 준비된 예시 통신문으로 대신해요."
       : "통신문 글과 사진은 일정을 뽑을 때 AI(Anthropic)로 보내요. 원문은 저장하지 않고, 준비물이 나온 줄만 근거로 남겨요. AI가 틀릴 수 있으니 넣기 전에 확인해 주세요."}</p>`);
+    if (MODE.demo) mountRealNotices();
     const list = await plusApi("/scenarios");
     $("#preview").insertAdjacentHTML("beforebegin", `<div class="card" id="quickCard"><strong>알림장 없는 평소 일정</strong>
       <p class="hint">상황을 고르면 기본 준비물이 추천으로 들어가요. 빼거나 더할 수 있어요.</p>

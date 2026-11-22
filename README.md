@@ -43,7 +43,7 @@ flowchart LR
 
 | 부분 | 상태 |
 | --- | --- |
-| 금지·조건·"등" 찾기, 추천, 세기·판정, 말투 | 구현. 자동 시험 55개(모델·네트워크 없음). 실제 통신문 23건의 문장으로 잼: "등" 11/11, 금지 물건 35/43, 머리말 있는 준비물 줄 19건은 114/114, 머리말 없는 표·학년별 목록 4건은 0/78 ([eval/real-notices-result.md](eval/real-notices-result.md)) |
+| 금지·조건·"등" 찾기, 추천, 세기·판정, 말투 | 구현. 자동 시험 62개(모델·네트워크 없음). 실제 통신문 23건의 문장으로 잼: "등" 11/11, 금지 물건 처음 35/43(잘못 3) → 고친 뒤 43/43(잘못 1, 같은 23건으로 다시 잰 값), 머리말 있는 준비물 줄 19건은 114/114, 머리말 없는 표·학년별 목록 4건은 0/78 ([eval/real-notices-result.md](eval/real-notices-result.md)) |
 | 부모 화면, 아이 미션, 스티커, 돌아오기, 이번엔 빼기 | 구현. 공개 주소에서 눌러서 확인(Chromium 계열 1대, 노트북·폰 크기 창). 실제 폰은 미확인 |
 | 통신문 읽기 (Claude API) | 실제 판에 구현. 공개 프로토타입은 규칙으로 읽음 |
 | 사진 확인 (Claude API) | 실제 판에 구현. 정확도 미측정. 공개 프로토타입은 준비된 결과 |
@@ -59,7 +59,7 @@ flowchart LR
 ```bash
 git clone -b hoyeon https://github.com/kimble125/chaenggyeojwo-ai-bag-check.git
 cd chaenggyeojwo-ai-bag-check/poc/donghyun
-python3 -m unittest discover -s tests   # 55개, 설치·키 불필요
+python3 -m unittest discover -s tests   # 62개, 설치·키 불필요
 python3 demo_server.py                  # 예시 판: http://127.0.0.1:6111
 ```
 

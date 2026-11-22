@@ -14,10 +14,11 @@ import re
 
 _PAREN = re.compile(r"^(.*?)\s*[(（](.+?)[)）]\s*(.*)$")
 _QTY = re.compile(r"(\d+|한|두|세)\s*(개|장|자루|권|벌|켤레|병|봉지|통|쪽)")
-_SPLIT_NAMES = re.compile(r"\s*(?:[·,、/]|와\s|과\s|및\s|이나\s|\s또는\s|\s혹은\s)\s*")
+_SPLIT_NAMES = re.compile(r"\s*(?:[·,、/]|와\s|과\s|및\s|이나\s|\s또는\s|\s혹은\s|\s등의?\s)\s*")   # "핸드폰 등 귀중품" → 핸드폰, 귀중품
 _BAN_VERB = re.compile(
     r"([^.!?()（）\n]{1,60}?)\s*(?:은|는|을|를|도)?\s*"
-    r"(?:가져오지|가져가지|가지고\s?오지|가지고\s?가지|갖고\s?오지|지참하지|싸\s?오지|들고\s?오지|휴대하지|소지하지)\s*(?:않|말|마|못)(?!아도|어도)")
+    r"(?:가져오지|가져가지|가지고\s?오지|가지고\s?가지|갖고\s?오지|지참하지|싸\s?오지|들고\s?오지|휴대하지|소지하지"
+    r"|(?:가지고|갖고)\s?등교하지|착용하지)\s*(?:않|말|마|못)(?!아도|어도)")
 _BAN_MARK = re.compile(
     r"([가-힣A-Za-z0-9 ·,、/]{1,40}?)\s*(?:등)?\s*(?:은|는|의)?\s*"
     r"(?:(?:지참|반입|사용|휴대|소지|착용)\s*(?:은|는|이|을|를)?\s*)?(불가|금지|안\s?됩니다|안\s?돼요|안\s?됨|[X✕×])(?:합니다|입니다|됩니다|해요|예요)?(?![가-힣A-Za-z])")
@@ -33,7 +34,9 @@ _WEAR = re.compile(r"복장|옷차림|입고|착용|신고|체육복|활동복|�
 _SUBMIT = re.compile(r"회신서|신청서|동의서|참가서|확인서|회신")
 _CONSUMED = re.compile(r"간식|과자|음료|물티슈|휴지|티슈|비닐|봉지|봉투|약$|멀미약|밴드|도시락$|김밥|과일|회신서|신청서|동의서")
 _KEEP = re.compile(r"도시락\s?통|물통|텀블러|수저|젓가락")
-_TRIM = re.compile(r"^[\s※\-•·*\d.)]+|[\s.,·]+$")
+_TRIM = re.compile(r"^[\s※\-•·*\d.)◦○■□▶★]+|[\s.,·]+$")
+_ADVICE = re.compile(r"(?:자제|지양|권장|삼가)$")             # "이동차량 내 취식 자제"는 물건이 아니라 행동 권고
+_ACTION_BAN = re.compile(r"(?:^|\s)(?:세탁|환불|교환|반품|주차|출입|입장|변경|취소|대여|재사용|수선)$")   # "속옷(여벌, 세탁 불가)": 세탁할 수 없다는 설명
 _STOP = {"", "등", "것", "물건", "물품", "기타", "그 외", "준비물"}
 _ONE = {"캔", "껌", "칼", "돈", "물", "빵", "떡", "총", "공", "술", "약"}      # 한 글자여도 물건인 것
 
@@ -57,7 +60,12 @@ def _names(chunk: str) -> list[str]:
     for part in _SPLIT_NAMES.split(chunk):
         n = _clean(part)
         n = re.sub(r"^(?:그리고|또한|단|특히)\s*", "", n)
+        n = re.sub(r"(?:은|는)?\s+[가-힣]+(?:으로|에)$", "", n)  # "개인 귀중품은 수영장으로" → "개인 귀중품"
+        n = re.sub(r"^[가-힣]+\s내\s+", "", n)                # "체험시설 내 외부 음식" → "외부 음식"
         n = re.sub(r"(?<=[가-힣])(?:을|를)$", "", n)          # "장난감을" → "장난감"
+        n = re.sub(r"(?<=[가-힣]{2})(?:은|는)$", "", n)
+        if _ADVICE.search(n):
+            continue
         if n not in _STOP and (1 < len(n) <= 16 or n in _ONE) and not re.search(r"습니다|세요|니다$|가져오|가지고|갖고|지참하|들고", n):
             out.append(n)
     return out
@@ -99,8 +107,8 @@ def find_forbidden(text: str) -> list[dict]:
         chunks = [m.group(1) for m in _BAN_IF.finditer(line_wo)]
         rest = _BAN_IF.sub(" ", line_wo)                   # 위에서 읽은 토막은 아래 규칙이 다시 읽지 않게 뺀다
         chunks += [m.group(1) for m in _BAN_VERB.finditer(rest)]
-        chunks += [m.group(1) for m in _BAN_MARK.finditer(rest)]
-        chunks = [re.split(r"위해서?|위하여|때문에|인해", c)[-1] for c in chunks]      # "식중독 예방을 위해 외부음식 반입은 금지" → "외부음식"
+        chunks += [m.group(1) for m in _BAN_MARK.finditer(rest) if not _ACTION_BAN.search(m.group(1).strip())]
+        chunks = [re.split(r"위해서?|위하여|때문에|인해|(?:문제|이유)로", c)[-1] for c in chunks]      # "식중독 예방을 위해 외부음식 반입은 금지" → "외부음식"
         chunks = [c.split(":")[-1].split("：")[-1] for c in chunks]
         for h in heads:                                    # 목록 안의 괄호 설명은 떼고 이름만 읽는다
             chunks += [re.sub(r"[(（][^)）]*[)）]?", "", x).strip(" )）") for x in re.split(r"[,、]", h)]

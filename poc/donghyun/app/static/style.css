@@ -224,3 +224,10 @@ dialog h3 { margin: 0 0 4px; }
 .traits input { width: auto; margin-right: 4px; }
 select { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px 12px; font: inherit; color: inherit; margin-top: 4px; }
 a.ghost { text-decoration: none; color: inherit; display: inline-block; }
+
+/* 예시 판: 실제 통신문 문장 단추 */
+.realrow { margin: 12px 0 10px; }
+.realrow .lbl { display: block; }
+.realbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.realbtns .ghost.small { margin-top: 4px; }
+.realrow .hint { font-size: 12px; margin-top: 6px; }
