@@ -175,11 +175,14 @@ function renderSteps() {
 }
 
 function loadScript(src) { return new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => no(new Error("스크립트를 못 받았어요: " + src)); document.head.appendChild(s); }); }
-async function probeWeather() {
-  try {
-    const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=37.38&longitude=127.12&daily=weather_code&forecast_days=1&timezone=Asia%2FSeoul", { signal: AbortSignal.timeout(3500) });
-    return r.ok;
-  } catch { return false; }
+async function probeWeather() {   // 예보·대기질 두 서버가 모두 3.5초 안에 답할 때만 진짜 날씨를 쓴다(boot.py 의 동기 요청은 시간 제한이 없다)
+  const day = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+  const ok = (url) => fetch(url, { signal: AbortSignal.timeout(3500) }).then((r) => r.ok, () => false);
+  const [fc, air] = await Promise.all([
+    ok("https://api.open-meteo.com/v1/forecast?latitude=37.38&longitude=127.12&daily=weather_code&forecast_days=1&timezone=Asia%2FSeoul"),
+    ok(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=37.38&longitude=127.12&timezone=Asia%2FSeoul&start_date=${day}&end_date=${day}&hourly=pm10,pm2_5`),
+  ]);
+  return fc && air;
 }
 const stage = (t) => ($("#stage").textContent = t);
 function fail(e) {

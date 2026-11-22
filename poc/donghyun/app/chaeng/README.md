@@ -18,7 +18,7 @@
 | 서버 없이 도는 판 | 같은 화면과 같은 계산 코드를 브라우저 안(Pyodide)에서 돌린다. `python3 build_site.py` → 저장소의 `docs/demo`. 화면의 `/api/` 요청을 `demo_server.dispatch()`로 보낸다 | `../../build_site.py`, `../../web_demo/` |
 | 이번엔 빼기 | 통신문에는 있지만 이번엔 안 가져가는 것(예: 학교에 이미 있음)을 보호자가 표시한다. 지우지 않고, 세지 않고, 아이 화면에는 회색 한 줄로 알린다. 금지(통신문이 가져오지 말라고 한 것)와는 다른 것이다 | `service.set_skipped`, `../static/plus.js`, `../static/kid.js` |
 | 내 캘린더에 넣기 | 말투 3가지로 구글 캘린더의 채워진 화면을 여는 주소와 캘린더 파일(.ics, 전날 19:00·당일 아침 알림)을 만든다. 계정 연결 없음 | `calendar_out.py`, `service.tone_previews`, `../static/plus.js` |
-| MCP 도구 | `read_notice`, `packing_plan`, `calendar_entry`. 본체에서는 캘린더 MCP 서버에 더해지고(`register`), 예시 서버에서는 `/mcp/` 가 JSON-RPC 로 답한다(`handle_rpc`). 예시 서버는 이 컴퓨터의 요청만 받고 `MCP_ACCESS_TOKEN` 이 있으면 Bearer 토큰을 확인한다. 예시 서버에는 Claude Code 2.1.329가 연결됐다(`claude mcp get` 의 ✔ Connected, 2026-11-20). 본체에서의 등록과 모델이 도구를 불러 답하는 것은 확인하지 못했다 | `mcp_tools.py`, `../main.py`, `../../demo_server.py` |
+| MCP 도구 | `read_notice`, `packing_plan`, `calendar_entry`. 본체에서는 캘린더 MCP 서버에 더해지고(`register`), 예시 서버에서는 `/mcp/` 가 JSON-RPC 로 답한다(`handle_rpc`). 예시 서버는 이 컴퓨터의 요청만 받고 `MCP_ACCESS_TOKEN` 이 있으면 Bearer 토큰을 확인한다. 예시 서버에는 Claude Code 2.1.329가 연결됐다(`claude mcp get` 의 ✔ Connected, 2026-11-20). 2026-11-22 Claude 데스크톱 앱에 예시 서버를 연결해 모델이 `packing_plan` 을 불러 답하는 것을 확인했다(지어낸 예시 통신문 기준). 웹 Claude 에서는 연결되지 않았다. 본체(실제 판)에서의 등록은 확인하지 못했다 | `mcp_tools.py`, `../main.py`, `../../demo_server.py` |
 | 마스코트·진행 막대 | 가방 친구 쏙이(이미지 생성 AI로 만든 그림), "가방 속 n / m" 막대, 예보에서 읽은 날씨 한 줄 | `../static/mascot/`, `../static/kid.js` |
 
 ## 데이터의 근거

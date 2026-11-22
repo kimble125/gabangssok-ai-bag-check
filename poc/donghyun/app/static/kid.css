@@ -103,7 +103,7 @@ h1 { font-family: "Jua", sans-serif; font-weight: 400; font-size: 30px; line-hei
 #doneGrid .card .nm { font-size: 19px; }
 #doneGrid .card.done .state { color: var(--done); }
 #doneGrid .card.todo .state { color: var(--todo); }
-.screen { padding-bottom: 4px; }
+.screen { padding-bottom: 12px; }
 
 /* 하단 버튼 */
 .dock { position: sticky; bottom: 0; margin-top: auto; padding: 18px 0 calc(16px + env(safe-area-inset-bottom));
@@ -206,4 +206,18 @@ h1 { font-family: "Jua", sans-serif; font-weight: 400; font-size: 30px; line-hei
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --warn: #f08d7a; --warn-soft: #43201a; --rec: #cf9ff0; --rec-soft: #352641; }
   :root:not([data-theme="light"]) .ban { color: #ffd9d1; } :root:not([data-theme="light"]) .recbar { color: #ecd8fb; }
+}
+
+/* 낮은 화면: 아래에 붙은 큰 단추가 안내 글을 가리지 않게 여백·간격을 줄인다 (390×780, 360×640 확인) */
+@media (max-height: 820px) {
+  .head { padding: 2px 4px 8px; }
+  .dots { margin-bottom: 8px; }
+  .tip { margin-top: 8px; }
+  .stage { min-height: 0; }
+  .dock { padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .sub { padding: 6px 10px; }
+}
+@media (max-height: 700px) {
+  .big { aspect-ratio: auto; gap: 8px; padding: 18px 0; }
+  .big .ic { font-size: 80px; }
 }
